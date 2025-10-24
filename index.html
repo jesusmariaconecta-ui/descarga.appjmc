@@ -11,36 +11,18 @@
   <meta name="theme-color" content="#0b3a75" />
   <style>
     :root{
-      --blue:#0b3a75;      /* azul principal */
-      --blue-2:#173f8a;
-      --bg:#f5f7fb;
-      --text:#1f2a44;
-      --muted:#5b6a86;
-      --card:#ffffff;
-      --radius:24px;
-      /* acentos coloridos estilo municipal */
-      --pink:#e91e63;
-      --green:#34c759;
-      --orange:#ff9f1c;
-      --cyan:#00bcd4;
-      --purple:#8a4fff;
-      --gray:#e6ebf5;
+      --blue:#0b3a75; --blue-2:#173f8a; --bg:#f5f7fb; --text:#1f2a44; --muted:#5b6a86;
+      --radius:24px; --pink:#e91e63; --green:#34c759; --orange:#ff9f1c; --cyan:#00bcd4; --purple:#8a4fff;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{box-sizing:border-box} html,body{height:100%}
     body{
-      margin:0;
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;
+      margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;
       background:
         radial-gradient(900px 450px at 5% -10%, #e6eefc 0%, transparent 60%),
-        radial-gradient(850px 420px at 100% 0, #eaf7ff 0%, transparent 60%),
-        var(--bg);
-      color:var(--text);
-      line-height:1.6;
+        radial-gradient(850px 420px at 100% 0, #eaf7ff 0%, transparent 60%), #f5f7fb;
+      color:var(--text); line-height:1.6;
     }
     .container{max-width:1080px;margin:0 auto;padding:24px}
-
-    /* HERO */
     .hero{position:relative;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,var(--blue),var(--blue-2) 70%);padding:28px;border:1px solid #d9e1f2;box-shadow:0 14px 40px rgba(11,58,117,.18)}
     .hero::after{content:"";position:absolute;inset:auto 0 0 0;height:10px;background:
       linear-gradient(90deg,var(--pink),var(--orange),var(--green),var(--cyan),var(--purple));}
@@ -51,21 +33,15 @@
     .hero h1{margin:0 0 6px;color:#fff;font-size:clamp(26px,4vw,36px)}
     .lead{margin:0;color:#eaf2ff}
     .pill{display:inline-block;margin-top:8px;background:#ffffff25;color:#fff;border:1px solid #ffffff55;padding:6px 12px;border-radius:999px;font-size:13px}
-
-    /* CARD DESCARGA */
     .card{background:linear-gradient(180deg,#fff,#f9fbff);border:1px solid #dfe6f5;border-radius:var(--radius);padding:24px;box-shadow:0 10px 24px rgba(15,34,86,.10)}
     h2{margin:0 0 10px;font-size:22px;color:#0f2a5a}
-    .muted{color:var(--muted);font-size:14px}
-
+    .muted{color:#5b6a86;font-size:14px}
     .download{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:14px}
     .btn{display:inline-flex;align-items:center;gap:10px;padding:14px 18px;border-radius:16px;border:none;cursor:pointer;font-weight:700;text-decoration:none;transition:transform .05s ease, box-shadow .15s ease}
     .btn:active{transform:translateY(1px)}
     .btn-primary{background:linear-gradient(180deg,#1360c8,#0b3a75);color:#fff;box-shadow:0 10px 22px rgba(11,58,117,.25)}
-    .btn-disabled{pointer-events:none;opacity:.6}
-
     .meta{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
     .tag{display:inline-flex;align-items:center;gap:8px;background:#eef3ff;padding:6px 12px;border-radius:999px;font-size:12px;color:#0b3a75;border:1px solid #d0dcff}
-
     footer{padding:28px 0;color:#5b6a86;text-align:center}
   </style>
 </head>
@@ -74,7 +50,6 @@
     <header class="hero">
       <div class="hero-grid">
         <div class="app-icon">
-          <!-- Ícono grande local con fallback a RAW si algo falla -->
           <img
             src="activos/1024-convertido-a-mediano.jpeg"
             alt="Icono de la app Jesús María Conecta"
@@ -92,18 +67,18 @@
     <main style="margin-top:20px">
       <section class="card">
         <h2>Descarga para Android</h2>
-        <p class="muted" id="apk-status"></p>
+        <p class="muted">Descarga lista.</p>
 
         <div class="download">
-          <a id="btn-apk" class="btn btn-primary btn-disabled" href="#" download>
+          <a id="btn-apk" class="btn btn-primary" href="https://github.com/jesusmariaconecta-ui/descarga.appjmc/releases/download/v1%281.1.1%29/apkjmc.9.04.31.pm" download>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v10m0 0 4-4m-4 4-4-4M5 21h14" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span>Descargar APK</span>
           </a>
         </div>
 
         <div class="meta">
-          <span class="tag" id="apk-version">Versión 1 (1.1.1)</span>
-          <span class="tag" id="apk-size">Tamaño 45.7 MB</span>
+          <span class="tag">Versión 1 (1.1.1)</span>
+          <span class="tag">Tamaño 45.7 MB</span>
         </div>
       </section>
     </main>
@@ -114,64 +89,8 @@
   </div>
 
 <script>
-  // === CONFIGURACIÓN ===
-  // Intenta primero con la API pública (repo es público):
-  const OWNER = "jesusmariaconecta-ui";
-  const REPO  = "descarga.appjmc";
-
-  // URL directa (déjala vacía para usar la API). Si la pones, se usa esta y no la API.
-  const APK_URL = ""; 
-  // Fallback manual extra (opcional):
-  const FALLBACK_APK_URL = ""; // ejemplo: "https://github.com/.../releases/download/v1.1.1/Nombre.apk"
-
-  const DISPLAY_VERSION = "Versión 1 (1.1.1)";
-  // === FIN CONFIGURACIÓN ===
-
-  const $ = (id)=>document.getElementById(id);
-  $("year").textContent = new Date().getFullYear();
-  $("apk-version").textContent = DISPLAY_VERSION;
-
-  function enableButton(url, msg="Descarga lista.") {
-    const btn = document.getElementById("btn-apk");
-    btn.href = url;
-    btn.classList.remove("btn-disabled");
-    document.getElementById("apk-status").textContent = msg;
-  }
-
-  async function setupDownload() {
-    // 1) Si hay URL directa, úsala
-    if (APK_URL) { enableButton(APK_URL); return; }
-
-    // 2) Intentar por API (repo público). Añadimos User-Agent para evitar bloqueos
-    try {
-      const api = `https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`;
-      const res = await fetch(api, {
-        headers: {
-          "Accept": "application/vnd.github+json",
-          "User-Agent": "JMC-Download-Page",
-          "Cache-Control": "no-store"
-        }
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      // Busca el primer asset .apk (case-insensitive)
-      const assets = (data.assets || []).filter(a => /\.apk$/i.test(a.name));
-      if (!assets.length) throw new Error("Release sin .apk");
-      enableButton(assets[0].browser_download_url);
-      return;
-    } catch (e) {
-      console.warn("API fallback:", e);
-    }
-
-    // 3) Fallback manual
-    if (FALLBACK_APK_URL) {
-      enableButton(FALLBACK_APK_URL, "Descarga lista (alternativo).");
-    } else {
-      document.getElementById("apk-status").textContent = "No se pudo preparar la descarga.";
-      document.getElementById("btn-apk").href = "#";
-    }
-  }
-  setupDownload();
+  // Año dinámico
+  document.getElementById("year").textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
