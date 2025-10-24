@@ -74,8 +74,12 @@
     <header class="hero">
       <div class="hero-grid">
         <div class="app-icon">
-          <!-- Ícono grande local -->
-          <img src="activos/1024-convertido-a-mediano.jpeg" alt="Icono de la app Jesús María Conecta" />
+          <!-- Ícono grande local con fallback a RAW si algo falla -->
+          <img
+            src="activos/1024-convertido-a-mediano.jpeg"
+            alt="Icono de la app Jesús María Conecta"
+            onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/jesusmariaconecta-ui/descarga.appjmc/main/activos/1024-convertido-a-mediano.jpeg';"
+          />
         </div>
         <div>
           <h1>Jesús María Conecta</h1>
@@ -111,15 +115,16 @@
 
 <script>
   // === CONFIGURACIÓN ===
-  // MODO 1 — URL directa (si alguna vez quieres forzar un enlace exacto):
-  const APK_URL = ""; // deja vacío para usar la API de la Release
-
-  // MODO 2 — Automático por API (repo público con Release):
+  // Intenta primero con la API pública (repo es público):
   const OWNER = "jesusmariaconecta-ui";
   const REPO  = "descarga.appjmc";
 
+  // URL directa (déjala vacía para usar la API). Si la pones, se usa esta y no la API.
+  const APK_URL = ""; 
+  // Fallback manual extra (opcional):
+  const FALLBACK_APK_URL = ""; // ejemplo: "https://github.com/.../releases/download/v1.1.1/Nombre.apk"
+
   const DISPLAY_VERSION = "Versión 1 (1.1.1)";
-  const FALLBACK_APK_URL = ""; // opcional: segundo enlace manual si algo falla
   // === FIN CONFIGURACIÓN ===
 
   const $ = (id)=>document.getElementById(id);
@@ -135,31 +140,35 @@
 
   async function setupDownload() {
     // 1) Si hay URL directa, úsala
-    if (APK_URL) {
-      enableButton(APK_URL);
-      return;
-    }
+    if (APK_URL) { enableButton(APK_URL); return; }
 
-    // 2) Si no hay URL directa, intenta por API (repo debe ser público)
+    // 2) Intentar por API (repo público). Añadimos User-Agent para evitar bloqueos
     try {
       const api = `https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`;
-      const res = await fetch(api, { headers: { 'Accept': 'application/vnd.github+json' } });
+      const res = await fetch(api, {
+        headers: {
+          "Accept": "application/vnd.github+json",
+          "User-Agent": "JMC-Download-Page",
+          "Cache-Control": "no-store"
+        }
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      // Busca el primer asset .apk (case-insensitive)
       const assets = (data.assets || []).filter(a => /\.apk$/i.test(a.name));
-      if (!assets.length) throw new Error("No hay assets .apk en la última versión");
-      const url = assets[0].browser_download_url;
-      enableButton(url);
+      if (!assets.length) throw new Error("Release sin .apk");
+      enableButton(assets[0].browser_download_url);
       return;
     } catch (e) {
-      console.warn(e);
+      console.warn("API fallback:", e);
     }
 
     // 3) Fallback manual
     if (FALLBACK_APK_URL) {
       enableButton(FALLBACK_APK_URL, "Descarga lista (alternativo).");
     } else {
-      document.getElementById("apk-status").textContent = "No se pudo preparar la descarga. Verifica la Release o define APK_URL.";
+      document.getElementById("apk-status").textContent = "No se pudo preparar la descarga.";
+      document.getElementById("btn-apk").href = "#";
     }
   }
   setupDownload();
