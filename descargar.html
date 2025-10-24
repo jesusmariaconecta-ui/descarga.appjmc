@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<script>
+// === CONFIGURA AQUÍ ===
+const OWNER = "OWNER"; // ← tu usuario u organización
+const REPO = "REPO"; // ← nombre del repositorio
+const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.tu.paquete"; // opcional
+const APP_STORE_URL = "https://apps.apple.com/app/id0000000000"; // opcional
+// Si quieres forzar un APK específico si no hay releases:
+const FALLBACK_APK_URL = ""; // p.ej. "https://github.com/OWNER/REPO/releases/download/v1.0.0/TuApp.apk"
+
+
+// === FIN CONFIG ===
+
+
+const $ = (id)=>document.getElementById(id);
+$("year").textContent = new Date().getFullYear();
+if (PLAY_STORE_URL && PLAY_STORE_URL !== "#") $("btn-play").href = PLAY_STORE_URL; else $("btn-play").style.display='none';
+if (APP_STORE_URL && APP_STORE_URL !== "#") $("btn-ios").href = APP_STORE_URL; else $("btn-ios").style.display='none';
+
+
+async function findLatestApk() {
+if (!OWNER || !REPO || OWNER === "OWNER") {
+$("apk-status").textContent = "Configura OWNER y REPO en el código";
+return;
+}
+const api = `https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`;
+try {
+const res = await fetch(api, { headers: { 'Accept': 'application/vnd.github+json' } });
+if (!res.ok) throw new Error(`HTTP ${res.status}`);
+const data = await res.json();
+const assets = (data.assets||[]).filter(a=>/\.apk$/i.test(a.name));
+if (!assets.length) throw new Error('No hay assets .apk en la última release');
+const apk = assets[0];
+
+
+const url = apk.browser_download_url;
+const sizeMB = (apk.size/1024/1024).toFixed(2);
+
+
+// Actualiza UI
+$("btn-apk").href = url;
+$("btn-apk").download = apk.name;
+$("btn-apk").removeAttribute('disabled');
+$("apk-status").textContent = "APK listo para descargar.";
+$("apk-version").textContent = data.tag_name ? data.tag_name : 'Última versión';
+$("apk-size").textContent = `${sizeMB} MB`;
+$("adb-code").textContent = `adb install ${apk.name}`;
+
+
+// Notas (primeros 200 chars)
+const notes = (data.body||'').replace(/\r/g,'').trim();
+$("apk-notes").textContent = notes ? notes.slice(0,200)+(notes.length>200?'…':'') : '';
+
+
+// Genera QR usando un servicio sin anuncios (goqr)
+const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}`;
+$("qr").src = qrURL;
+$("qr-caption").textContent = apk.name;
+
+
+} catch (err) {
+console.warn(err);
+if (FALLBACK_APK_URL) {
+$("btn-apk").href = FALLBACK_APK_URL;
+$("btn-apk").removeAttribute('disabled');
+$("apk-status").textContent = "Usando enlace alternativo (fallback).";
+const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(FALLBACK_APK_URL)}`;
+$("qr").src = qrURL;
+$("qr-caption").textContent = 'Enlace alternativo';
+} else {
+$("apk-status").textContent = "No se pudo obtener el APK. Verifica que el repo y la Release sean públicos y contengan un .apk.";
+}
+}
+}
+
+
+findLatestApk();
+</script>
+</body>
+</html>
