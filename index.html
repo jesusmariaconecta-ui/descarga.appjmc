@@ -90,7 +90,7 @@
     <main style="margin-top:20px">
       <section class="card">
         <h2>Descarga para Android</h2>
-        <p class="muted" id="apk-status">Buscando la última versión…</p>
+        <p class="muted" id="apk-status"></p>
 
         <div class="download">
           <a id="btn-apk" class="btn btn-primary" href="#" download disabled>
@@ -101,16 +101,10 @@
 
         <div class="meta">
           <span class="tag" id="apk-version">Versión 1 (1.1.1)</span>
-          <span class="tag" id="apk-size">Tamaño —</span>
+          <span class="tag" id="apk-size">Tamaño 45.7 MB</span>
         </div>
 
-        <div class="badges">
-          <span class="badge" style="border-color:#ffc9de;background:#fff0f6;color:#c2185b">● Rosa</span>
-          <span class="badge" style="border-color:#bff6c5;background:#ecffef;color:#1b8a2f">● Verde</span>
-          <span class="badge" style="border-color:#ffe1b0;background:#fff7e6;color:#b96a00">● Naranja</span>
-          <span class="badge" style="border-color:#b6f1ff;background:#e9fbff;color:#007d91">● Cian</span>
-          <span class="badge" style="border-color:#e1d0ff;background:#f7f0ff;color:#5a2bb8">● Morado</span>
-        </div>
+        
       </section>
     </main>
 
@@ -126,7 +120,7 @@
   const DISPLAY_VERSION = "Versión 1 (1.1.1)"; // leyenda fija solicitada
   // Opcional: si quieres forzar un APK específico si no hay releases o el repo es privado
   // const FALLBACK_APK_URL = "https://github.com/OWNER/REPO/releases/download/vX.Y.Z/TuApp.apk";
-  const FALLBACK_APK_URL = "";
+  const FALLBACK_APK_URL = ""; // si no configuras OWNER/REPO, deja este valor vacío y el botón permanecerá deshabilitado
   // === FIN CONFIG ===
 
   const $ = (id)=>document.getElementById(id);
@@ -135,7 +129,12 @@
 
   async function findLatestApk() {
     if (!OWNER || !REPO || OWNER === "OWNER") {
-      $("apk-status").textContent = "Configura OWNER y REPO en el código";
+      // No mostramos mensajes; si hay FALLBACK, lo usamos, si no, dejamos el botón deshabilitado.
+      if (FALLBACK_APK_URL) {
+        $("btn-apk").href = FALLBACK_APK_URL;
+        $("btn-apk").removeAttribute('disabled');
+        $("apk-status").textContent = "Descarga lista.";
+      }
       return;
     }
     const api = `https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`;
@@ -155,7 +154,8 @@
       $("btn-apk").download = apk.name;
       $("btn-apk").removeAttribute('disabled');
       $("apk-status").textContent = "Descarga lista.";
-      $("apk-size").textContent = `Tamaño ${sizeMB} MB`;
+      // Mantener tamaño indicado por el municipio
+      $("apk-size").textContent = "Tamaño 45.7 MB";
     } catch (err) {
       console.warn(err);
       if (FALLBACK_APK_URL) {
