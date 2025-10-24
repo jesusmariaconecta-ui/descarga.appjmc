@@ -61,12 +61,10 @@
     .btn{display:inline-flex;align-items:center;gap:10px;padding:14px 18px;border-radius:16px;border:none;cursor:pointer;font-weight:700;text-decoration:none;transition:transform .05s ease, box-shadow .15s ease}
     .btn:active{transform:translateY(1px)}
     .btn-primary{background:linear-gradient(180deg,#1360c8,#0b3a75);color:#fff;box-shadow:0 10px 22px rgba(11,58,117,.25)}
+    .btn-disabled{pointer-events:none;opacity:.6}
 
     .meta{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
     .tag{display:inline-flex;align-items:center;gap:8px;background:#eef3ff;padding:6px 12px;border-radius:999px;font-size:12px;color:#0b3a75;border:1px solid #d0dcff}
-
-    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 10px;font-size:12px;border:1px dashed #d0dcff;background:#f3f7ff;color:#0b3a75}
 
     footer{padding:28px 0;color:#5b6a86;text-align:center}
   </style>
@@ -76,7 +74,8 @@
     <header class="hero">
       <div class="hero-grid">
         <div class="app-icon">
-          <img src="assets/1024-convertido-a-mediano.jpeg" alt="Icono de la app Jesús María Conecta" />
+          <!-- Ícono grande local -->
+          <img src="activos/1024-convertido-a-mediano.jpeg" alt="Icono de la app Jesús María Conecta" />
         </div>
         <div>
           <h1>Jesús María Conecta</h1>
@@ -92,7 +91,7 @@
         <p class="muted" id="apk-status"></p>
 
         <div class="download">
-          <a id="btn-apk" class="btn btn-primary" href="#" download disabled>
+          <a id="btn-apk" class="btn btn-primary btn-disabled" href="#" download>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v10m0 0 4-4m-4 4-4-4M5 21h14" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span>Descargar APK</span>
           </a>
@@ -102,8 +101,6 @@
           <span class="tag" id="apk-version">Versión 1 (1.1.1)</span>
           <span class="tag" id="apk-size">Tamaño 45.7 MB</span>
         </div>
-
-        
       </section>
     </main>
 
@@ -113,61 +110,59 @@
   </div>
 
 <script>
-  // === CONFIGURA AQUÍ ===
-  const OWNER = "OWNER";               // ← tu usuario u organización (ej. "KevinTorres")
-  const REPO  = "REPO";                // ← nombre del repositorio (ej. "jesus-maria-conecta")
-  const DISPLAY_VERSION = "Versión 1 (1.1.1)"; // leyenda fija solicitada
-  // Opcional: si quieres forzar un APK específico si no hay releases o el repo es privado
-  // const FALLBACK_APK_URL = "https://github.com/OWNER/REPO/releases/download/vX.Y.Z/TuApp.apk";
-  const FALLBACK_APK_URL = ""; // si no configuras OWNER/REPO, deja este valor vacío y el botón permanecerá deshabilitado
-  // === FIN CONFIG ===
+  // === CONFIGURACIÓN ===
+  // MODO 1 — URL directa (si alguna vez quieres forzar un enlace exacto):
+  const APK_URL = ""; // deja vacío para usar la API de la Release
+
+  // MODO 2 — Automático por API (repo público con Release):
+  const OWNER = "jesusmariaconecta-ui";
+  const REPO  = "descarga.appjmc";
+
+  const DISPLAY_VERSION = "Versión 1 (1.1.1)";
+  const FALLBACK_APK_URL = ""; // opcional: segundo enlace manual si algo falla
+  // === FIN CONFIGURACIÓN ===
 
   const $ = (id)=>document.getElementById(id);
   $("year").textContent = new Date().getFullYear();
   $("apk-version").textContent = DISPLAY_VERSION;
 
-  async function findLatestApk() {
-    if (!OWNER || !REPO || OWNER === "OWNER") {
-      // No mostramos mensajes; si hay FALLBACK, lo usamos, si no, dejamos el botón deshabilitado.
-      if (FALLBACK_APK_URL) {
-        $("btn-apk").href = FALLBACK_APK_URL;
-        $("btn-apk").removeAttribute('disabled');
-        $("apk-status").textContent = "Descarga lista.";
-      }
+  function enableButton(url, msg="Descarga lista.") {
+    const btn = document.getElementById("btn-apk");
+    btn.href = url;
+    btn.classList.remove("btn-disabled");
+    document.getElementById("apk-status").textContent = msg;
+  }
+
+  async function setupDownload() {
+    // 1) Si hay URL directa, úsala
+    if (APK_URL) {
+      enableButton(APK_URL);
       return;
     }
-    const api = `https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`;
+
+    // 2) Si no hay URL directa, intenta por API (repo debe ser público)
     try {
+      const api = `https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`;
       const res = await fetch(api, { headers: { 'Accept': 'application/vnd.github+json' } });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      const assets = (data.assets||[]).filter(a=>/\.apk$/i.test(a.name));
-      if (!assets.length) throw new Error('No hay assets .apk en la última versión');
-      const apk = assets[0];
+      const assets = (data.assets || []).filter(a => /\.apk$/i.test(a.name));
+      if (!assets.length) throw new Error("No hay assets .apk en la última versión");
+      const url = assets[0].browser_download_url;
+      enableButton(url);
+      return;
+    } catch (e) {
+      console.warn(e);
+    }
 
-      const url = apk.browser_download_url;
-      const sizeMB = (apk.size/1024/1024).toFixed(2);
-
-      // Actualiza UI
-      $("btn-apk").href = url;
-      $("btn-apk").download = apk.name;
-      $("btn-apk").removeAttribute('disabled');
-      $("apk-status").textContent = "Descarga lista.";
-      // Mantener tamaño indicado por el municipio
-      $("apk-size").textContent = "Tamaño 45.7 MB";
-    } catch (err) {
-      console.warn(err);
-      if (FALLBACK_APK_URL) {
-        $("btn-apk").href = FALLBACK_APK_URL;
-        $("btn-apk").removeAttribute('disabled');
-        $("apk-status").textContent = "Descarga lista (enlace alternativo).";
-      } else {
-        $("apk-status").textContent = "No se pudo obtener el APK. Verifica la versión publicada.";
-      }
+    // 3) Fallback manual
+    if (FALLBACK_APK_URL) {
+      enableButton(FALLBACK_APK_URL, "Descarga lista (alternativo).");
+    } else {
+      document.getElementById("apk-status").textContent = "No se pudo preparar la descarga. Verifica la Release o define APK_URL.";
     }
   }
-
-  findLatestApk();
+  setupDownload();
 </script>
 </body>
 </html>
