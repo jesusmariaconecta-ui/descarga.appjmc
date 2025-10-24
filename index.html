@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Descargar APK — Jesús María Conecta</title>
   <meta name="description" content="Descarga el APK oficial de Jesús María Conecta." />
-  <meta property="og:title" content="Descargar APK — Jesús María Conecta" />
-  <meta property="og:description" content="Descarga el APK oficial. Versión 1 (1.1.1)." />
-  <meta property="og:type" content="website" />
   <meta name="theme-color" content="#0b3a75" />
   <style>
     :root{
@@ -19,7 +16,7 @@
       margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;
       background:
         radial-gradient(900px 450px at 5% -10%, #e6eefc 0%, transparent 60%),
-        radial-gradient(850px 420px at 100% 0, #eaf7ff 0%, transparent 60%), #f5f7fb;
+        radial-gradient(850px 420px at 100% 0, #eaf7ff 0%, transparent 60%), var(--bg);
       color:var(--text); line-height:1.6;
     }
     .container{max-width:1080px;margin:0 auto;padding:24px}
@@ -56,11 +53,11 @@
     <header class="hero">
       <div class="hero-grid">
         <div class="app-icon">
-          <!-- Ícono grande con fallback a RAW por si la ruta relativa falla -->
+          <!-- Icono local con fallback a RAW por si falla la ruta relativa -->
           <img
-            src="activos/1024-convertido-a-mediano.jpeg"
+            src="assets/1024-convertido-a-mediano.jpeg"
             alt="Icono de la app Jesús María Conecta"
-            onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/jesusmariaconecta-ui/descarga.appjmc/main/activos/1024-convertido-a-mediano.jpeg';"
+            onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/jesusmariaconecta-ui/descarga.appjmc/main/assets/1024-convertido-a-mediano.jpeg';"
           />
         </div>
         <div>
@@ -77,9 +74,9 @@
         <p class="muted">Descarga lista.</p>
 
         <div class="download">
-          <!-- Enlace directo al asset de la Release v1.1.1 -->
+          <!-- Enlace estable al último release (nombre URL-encoded) -->
           <a class="btn btn-primary"
-             href="https://github.com/jesusmariaconecta-ui/descarga.appjmc/releases/download/v1.1.1/apkjmc.9.04.31.pm"
+             href="https://github.com/jesusmariaconecta-ui/descarga.appjmc/releases/latest/download/lanzamiento%20de%20la%20aplicaci%C3%B3n.apk"
              download>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v10m0 0 4-4m-4 4-4-4M5 21h14" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span>Descargar APK</span>
@@ -103,4 +100,5 @@
 </script>
 </body>
 </html>
+
 
